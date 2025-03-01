@@ -13,6 +13,18 @@ namespace WaterIntakeTracker.Datalayer.Models
         public string Name { get; set; }
 
         [Required]
+        [MaxLength(50)]
+        public string Username { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [MaxLength(100)]
+        public string Email { get; set; }
+
+        [Required]
+        public string Password { get; set; }
+
+        [Required]
         [Range(1, 120)]
         public int Age { get; set; }
 

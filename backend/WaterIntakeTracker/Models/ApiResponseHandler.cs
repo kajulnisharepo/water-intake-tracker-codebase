@@ -1,34 +1,39 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
 
 namespace WaterIntakeTracker.Models
 {
     public class ApiResponseHandler
     {
-        public static ApiResponse GetExceptionResponse(Exception exception){
-            ApiResponse apiResponse= new ApiResponse();
-            apiResponse.code = "1";
-            apiResponse.message = exception.Message;
+        public static ApiResponse<object> GetExceptionResponse(Exception exception)
+        {
+            var apiResponse = new ApiResponse<object>
+            {
+                Code = "1",
+                Message = exception.Message,
+                Data = null
+            };
             return apiResponse;
         }
 
-        public static ApiResponse GetAppResponse(ApiResponseType apiResponseType, object? contract){
-            ApiResponse apiResponse;
-             apiResponse = new ApiResponse(){ApiResponsedata = contract};
-             switch (apiResponseType)
-             {
+        public static ApiResponse<T> GetAppResponse<T>(ApiResponseType apiResponseType, T? data)
+        {
+            var apiResponse = new ApiResponse<T>
+            {
+                Data = data
+            };
+
+            switch (apiResponseType)
+            {
                 case ApiResponseType.Success:
-                    apiResponse.code = "0";
-                    apiResponse.message = "Success";
+                    apiResponse.Code = "0";
+                    apiResponse.Message = "Success";
                     break;
                 case ApiResponseType.NotFound:
-                    apiResponse.code = "2";
-                    apiResponse.message = "No Records Found";
+                    apiResponse.Code = "2";
+                    apiResponse.Message = "No Records Found";
                     break;
-             }
+            }
+
             return apiResponse;
         }
     }

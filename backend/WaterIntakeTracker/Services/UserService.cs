@@ -5,6 +5,8 @@ using WaterIntakeTracker.DataLayer;
 using WaterIntakeTracker.Datalayer.Models;
 using WaterIntakeTracker.Models;
 using WaterIntakeTracker.Services.Interface;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace WaterIntakeTracker.Services
 {
@@ -17,13 +19,30 @@ namespace WaterIntakeTracker.Services
             _context = context;
         }
 
-        public async Task<ApiResponse> RegisterUserAsync(UserModel userModel)
+        public async Task<ApiResponse<RegistrationResponseModel>> RegisterUserAsync(UserModel userModel)
         {
             try
             {
+                // Check if username or email already exists
+                if (await _context.Users.AnyAsync(u => u.Username == userModel.Username || u.Email == userModel.Email))
+                {
+                    return new ApiResponse<RegistrationResponseModel>
+                    {
+                        Code = "400",
+                        Message = "Username or email already exists",
+                        ResponseType = ApiResponseType.Failure
+                    };
+                }
+
+                // Hash the password
+                string hashedPassword = HashPassword(userModel.Password);
+
                 var user = new User
                 {
                     Name = userModel.Name,
+                    Username = userModel.Username,
+                    Email = userModel.Email,
+                    Password = hashedPassword,
                     Age = userModel.Age,
                     Weight = userModel.Weight,
                     Height = userModel.Height,
@@ -35,100 +54,107 @@ namespace WaterIntakeTracker.Services
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
-                return new ApiResponse
+                var registrationResponse = new RegistrationResponseModel
                 {
-                    code = "200",
-                    message = "User registered successfully",
-                    ApiResponsedata = new
-                    {
-                        user.Id,
-                        user.Name,
-                        user.Age,
-                        user.Weight,
-                        user.Height,
-                        user.BMI,
-                        user.CreatedAt,
-                        user.UpdatedAt
-                    },
+                    Message = "Registration Successful!",
+                    Name = user.Name,
+                    Username = user.Username,
+                    Email = user.Email,
+                    BMI = user.BMI
+                };
+
+                return new ApiResponse<RegistrationResponseModel>
+                {
+                    Code = "200",
+                    Message = "User registered successfully",
+                    Data = registrationResponse,
                     ResponseType = ApiResponseType.Success
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponse
+                return new ApiResponse<RegistrationResponseModel>
                 {
-                    code = "500",
-                    message = $"An error occurred while registering the user: {ex.Message}",
+                    Code = "500",
+                    Message = $"An error occurred while registering the user: {ex.Message}",
                     ResponseType = ApiResponseType.Failure
                 };
             }
         }
 
-        public async Task<ApiResponse> GetUserAsync(int id)
+        public async Task<ApiResponse<UserModel>> GetUserAsync(int id)
         {
             try
             {
                 var user = await _context.Users.FindAsync(id);
                 if (user == null)
                 {
-                    return new ApiResponse
+                    return new ApiResponse<UserModel>
                     {
-                        code = "404",
-                        message = "User not found",
+                        Code = "404",
+                        Message = "User not found",
                         ResponseType = ApiResponseType.NotFound
                     };
                 }
 
-                return new ApiResponse
+                var userModel = new UserModel
                 {
-                    code = "200",
-                    message = "User retrieved successfully",
-                    ApiResponsedata = user,
+                    Name = user.Name,
+                    Username = user.Username,
+                    Email = user.Email,
+                    Age = user.Age,
+                    Weight = user.Weight,
+                    Height = user.Height
+                };
+
+                return new ApiResponse<UserModel>
+                {
+                    Code = "200",
+                    Message = "User retrieved successfully",
+                    Data = userModel,
                     ResponseType = ApiResponseType.Success
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponse
+                return new ApiResponse<UserModel>
                 {
-                    code = "500",
-                    message = $"An error occurred while retrieving the user: {ex.Message}",
+                    Code = "500",
+                    Message = $"An error occurred while retrieving the user: {ex.Message}",
                     ResponseType = ApiResponseType.Failure
                 };
             }
         }
 
-        public async Task<ApiResponse> GetUserBMIAsync(int id)
+        public async Task<ApiResponse<double>> GetUserBMIAsync(int id)
         {
             try
             {
                 var user = await _context.Users.FindAsync(id);
                 if (user == null)
                 {
-                    return new ApiResponse
+                    return new ApiResponse<double>
                     {
-                        code = "404",
-                        message = "User not found",
+                        Code = "404",
+                        Message = "User not found",
                         ResponseType = ApiResponseType.NotFound
                     };
                 }
 
-                var bmiCategory = GetBMICategory(user.BMI);
-
-                return new ApiResponse
+                return new ApiResponse<double>
                 {
-                    code = "200",
-                    message = "BMI retrieved successfully",
-                    ApiResponsedata = new { BMI = user.BMI, Category = bmiCategory },
+                    Code = "200",
+                    Message = "BMI retrieved successfully",
+                    Data = user.BMI,
                     ResponseType = ApiResponseType.Success
                 };
             }
             catch (Exception ex)
             {
-                return new ApiResponse
+                return new ApiResponse<double>
                 {
-                    code = "500",
-                    message = $"An error occurred while retrieving the user's BMI: {ex.Message}",
+                    Code = "500",
+                    Message = $"An error occurred while retrieving the user's BMI: {ex.Message}",
                     ResponseType = ApiResponseType.Failure
                 };
             }
@@ -140,12 +166,22 @@ namespace WaterIntakeTracker.Services
             return Math.Round(weightKg / (heightM * heightM), 2);
         }
 
-        private string GetBMICategory(double bmi)
+        private string HashPassword(string password)
         {
-            if (bmi < 18.5) return "Underweight";
-            if (bmi < 25) return "Normal weight";
-            if (bmi < 30) return "Overweight";
-            return "Obese";
+            byte[] salt = new byte[128 / 8];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+
+            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: password,
+                salt: salt,
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 10000,
+                numBytesRequested: 256 / 8));
+
+            return $"{Convert.ToBase64String(salt)}:{hashed}";
         }
     }
 }

@@ -1,50 +1,80 @@
 <template>
-  <div class="min-h-screen bg-light dark:bg-dark text-light dark:text-dark transition-colors duration-300">
-    <div class="container mx-auto px-4 py-8">
-      <div class="flex justify-end mb-4">
-        <ThemeToggle />
-      </div>
-      <div class="relative py-3 sm:max-w-xl sm:mx-auto">
-        <div class="absolute inset-0 bg-gradient-to-r from-cyan-400 to-light-blue-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
-        <div class="relative px-4 py-10 bg-white dark:bg-gray-800 shadow-lg sm:rounded-3xl sm:p-20">
-          <div class="max-w-md mx-auto">
-            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-6 text-center">Fitness Tracker</h1>
-            <RegistrationForm v-if="!registrationComplete" @registration-complete="onRegistrationComplete" />
-            <ProfileConfirmation v-else :user="user" />
+  <div id="app" class="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text">
+    <header class="bg-light-accent1 dark:bg-dark-accent1 shadow">
+      <nav class="container mx-auto px-4 sm:px-6 py-4">
+        <div class="flex flex-wrap justify-between items-center">
+          <router-link to="/" class="text-2xl font-bold text-light-primary dark:text-dark-primary">Fitness Tracker</router-link>
+          <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+            <ThemeToggle />
+            <template v-if="!isAuthenticated">
+              <router-link to="/login" class="text-light-primary dark:text-dark-primary hover:text-light-secondary dark:hover:text-dark-secondary transition-colors duration-200">Login</router-link>
+              <router-link to="/register" class="text-light-primary dark:text-dark-primary hover:text-light-secondary dark:hover:text-dark-secondary transition-colors duration-200">Register</router-link>
+            </template>
+            <button v-else @click="logout" class="bg-light-secondary dark:bg-dark-secondary hover:bg-light-primary dark:hover:bg-dark-primary text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+              Logout
+            </button>
           </div>
         </div>
+      </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 py-8">
+      <router-view></router-view>
+    </main>
+
+    <footer class="bg-light-accent1 dark:bg-dark-accent1 py-4 mt-8">
+      <div class="container mx-auto px-4 text-center text-light-text dark:text-dark-text">
+        &copy; 2025 Fitness Tracker. All rights reserved.
       </div>
-    </div>
+    </footer>
   </div>
 </template>
 
 <script>
-import RegistrationForm from './components/user/registration/RegistrationForm.vue'
-import ProfileConfirmation from './components/user/profile/ProfileConfirmation.vue'
-import ThemeToggle from './components/ThemeToggle.vue'
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import ThemeToggle from './components/ThemeToggle.vue';
 
 export default {
   name: 'App',
   components: {
-    RegistrationForm,
-    ProfileConfirmation,
     ThemeToggle
   },
-  data() {
+  setup() {
+    const router = useRouter();
+    const isAuthenticated = computed(() => !!localStorage.getItem('token'));
+
+    const logout = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      router.push('/login');
+    };
+
     return {
-      registrationComplete: false,
-      user: null
-    }
-  },
-  methods: {
-    onRegistrationComplete(userData) {
-      this.user = userData;
-      this.registrationComplete = true;
-    }
+      isAuthenticated,
+      logout
+    };
   }
-}
+};
 </script>
 
 <style>
-/* Any custom styles can be added here */
+@import './assets/tailwind.css';
+
+/* Custom styles for mobile responsiveness */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Smooth transitions for theme changes */
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Any additional custom styles can be added here */
 </style>

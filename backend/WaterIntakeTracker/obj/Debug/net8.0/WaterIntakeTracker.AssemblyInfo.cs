@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WaterIntakeTracker")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9154db30cc978c7b3a1401071082a60318fdedb8")]
 [assembly: System.Reflection.AssemblyProductAttribute("WaterIntakeTracker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WaterIntakeTracker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

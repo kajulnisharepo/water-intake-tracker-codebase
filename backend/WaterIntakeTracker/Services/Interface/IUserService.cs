@@ -5,8 +5,8 @@ namespace WaterIntakeTracker.Services.Interface
 {
     public interface IUserService
     {
-        Task<ApiResponse> RegisterUserAsync(UserModel userModel);
-        Task<ApiResponse> GetUserAsync(int id);
-        Task<ApiResponse> GetUserBMIAsync(int id);
+        Task<ApiResponse<RegistrationResponseModel>> RegisterUserAsync(UserModel userModel);
+        Task<ApiResponse<UserModel>> GetUserAsync(int id);
+        Task<ApiResponse<double>> GetUserBMIAsync(int id);
     }
 }

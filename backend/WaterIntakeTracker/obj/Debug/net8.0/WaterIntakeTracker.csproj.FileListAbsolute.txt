@@ -137,3 +137,4 @@
 /Users/presidio/Desktop/HAI-EXPERIMENTS/Cohert/Solution/backend/WaterIntakeTracker/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /Users/presidio/Desktop/HAI-EXPERIMENTS/Cohert/Solution/backend/WaterIntakeTracker/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerUI.dll
 /Users/presidio/Desktop/HAI-EXPERIMENTS/Cohert/Solution/backend/WaterIntakeTracker/obj/Debug/net8.0/WaterIntakeTracker.MvcApplicationPartsAssemblyInfo.cs
+/Users/presidio/Desktop/HAI-EXPERIMENTS/Cohert/Solution/backend/WaterIntakeTracker/obj/Debug/net8.0/WaterIntakeTracker.sourcelink.json

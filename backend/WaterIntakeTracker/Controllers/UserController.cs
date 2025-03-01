@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using WaterIntakeTracker.Models;
-using WaterIntakeTracker.Datalayer.Models;
 using WaterIntakeTracker.Services.Interface;
 using System.Threading.Tasks;
 
