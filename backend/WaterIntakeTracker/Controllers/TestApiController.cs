@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WaterIntakeTracker.DataLayer;
 using WaterIntakeTracker.Models;
@@ -26,7 +25,7 @@ namespace WaterIntakeTracker.Controllers
             try{
                 IEnumerable<TestModel> datas = _dbHelper.GetTestModels();
                 
-                if(datas.Count() == 0){
+                if(!datas.Any()){
                     responseType = ApiResponseType.NotFound;
                 }
                 return Ok(ApiResponseHandler.GetAppResponse(responseType, datas));
@@ -42,12 +41,12 @@ namespace WaterIntakeTracker.Controllers
         {
             ApiResponseType responseType = ApiResponseType.Success;
             try{
-                TestModel datas = _dbHelper.GetTestModelsById(id);
+                TestModel data = _dbHelper.GetTestModelsById(id);
                 
-                if(datas==null){
+                if(data == null){
                     responseType = ApiResponseType.NotFound;
                 }
-                return Ok(ApiResponseHandler.GetAppResponse(responseType, datas));
+                return Ok(ApiResponseHandler.GetAppResponse(responseType, data));
             }
             catch(Exception ex){
                 return BadRequest(ApiResponseHandler.GetExceptionResponse(ex));
@@ -89,7 +88,7 @@ namespace WaterIntakeTracker.Controllers
             ApiResponseType responseType = ApiResponseType.Success;
             try{
                  _dbHelper.DeleteData(id);
-                 return Ok(ApiResponseHandler.GetAppResponse(responseType, null));
+                 return Ok(ApiResponseHandler.GetAppResponse<object>(responseType, null));
             }
             catch(Exception ex){
                 return BadRequest(ApiResponseHandler.GetExceptionResponse(ex));
